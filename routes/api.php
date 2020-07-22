@@ -17,3 +17,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::get('/usuarios','UsuarioController@getAllUsuarios');
+Route::get('/usuarios/{id}','UsuarioController@findById');
+Route::delete('/usuarios/{id}','UsuarioController@destroyUsuario');
+Route::get('/verificarut/{rut}', 'UsuarioController@verificaRut');
+

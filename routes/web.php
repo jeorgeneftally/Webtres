@@ -17,5 +17,5 @@ Route::get('/', function () {
     return view('layout.layout');
 });
 Route::resource('usuarios', 'UsuarioController');
-Route::get('verificarut/{rut}', 'UsuarioController@verificaRut');
+
 

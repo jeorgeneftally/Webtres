@@ -11,8 +11,8 @@
             <thead>
                 <tr>
                     <th scope="col">#</th>
-                    <th scope="col">Nombre</th>
                     <th scope="col">Foto</th>
+                    <th scope="col">Nombre</th>
                     <th scope="col">Apellido</th>
                     <th scope="col">Rut</th>
                     <th scope="col">Email</th>
@@ -24,15 +24,21 @@
                 @forelse ($usuarios as $usuario)
                 <tr>
                     <th>{{$loop->index+1}}</th>
-                    <td><img style="border-radius: 5%;" src="{{asset('storage').'/'.$usuario->foto}}" alt="" width="90px"></td>
-                    <td>{{$usuario->nombre}}</td>
-                    <td>{{$usuario->apellido}}</td>
+                    <td>
+                        @if($usuario->foto)
+                        <img style="border-radius: 5%;" src="{{asset('storage').'/'.$usuario->foto}}" alt="" width="70px">
+                        @else
+                        <img style="border-radius: 5%;" src="{{asset('storage').'/uploads/perfil.jpg'}}" alt="" width="70px">
+                        @endif
+                    </td>
+                    <td>{{ ucfirst($usuario->nombre)}}</td>
+                    <td>{{ ucfirst($usuario->apellido)}}</td>
                     <td>{{$usuario->rut}}</td>
                     <td>{{$usuario->email}}</td>
-                    <td>{{date('d-M-Y', strtotime($usuario->fecha_nacimiento ))}}</td>
+                    <td>{{date('d-m-Y', strtotime($usuario->fecha_nacimiento ))}}</td>
                     <td>
                         <form method="POST" action="{{ url("usuarios/{$usuario->id}") }}">
-                        <a href="{{url('usuarios/'.$usuario->id)}}" type="button" class="btn btn-info"><i class="fas fa-eye"></i></a>
+                            <a href="{{url('usuarios/'.$usuario->id)}}" type="button" class="btn btn-info"><i class="fas fa-eye"></i></a>
                             <a href="{{url('usuarios/'.$usuario->id.'/edit')}}" type="button" class="btn btn-success"><i class="fas fa-edit"></i></a>
                             @csrf
                             @method('DELETE')

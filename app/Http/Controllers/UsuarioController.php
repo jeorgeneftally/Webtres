@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Usuario;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class UsuarioController extends Controller
 {
@@ -14,7 +15,7 @@ class UsuarioController extends Controller
      */
     public function index()
     {
-        $usuarios=Usuario::all();
+        $usuarios = Usuario::all();
         return view('usuario.index')->with('usuarios', $usuarios);
     }
 
@@ -29,7 +30,7 @@ class UsuarioController extends Controller
     }
 
 
-    
+
     /**
      * Store a newly created resource in storage.
      *
@@ -37,21 +38,20 @@ class UsuarioController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {   
+    {
 
         $this->validate($request, [
-            'rut'=>'required',
-            'nombre'=>'required',
-            'apellido'=>'required',
-            'email'=>'required',
-            'fecha_nacimiento'=>'required',
-            'password'=>'required',
-            'foto'=>'required'
+            'rut' => 'required',
+            'nombre' => 'required',
+            'apellido' => 'required',
+            'email' => 'required',
+            'password' => 'required',
+            'foto'=>'required|mimes:jpg'
         ]);
 
         // Crear usuario
-        $pwd=hash('sha256',$request->input('password'));
-        $usuario=new Usuario;
+        $pwd = hash('sha256', $request->input('password'));
+        $usuario = new Usuario;
         $usuario->rut = $request->input('rut');
         $usuario->nombre = $request->input('nombre');
         $usuario->apellido = $request->input('apellido');
@@ -59,13 +59,13 @@ class UsuarioController extends Controller
         $usuario->fecha_nacimiento = $request->input('fecha_nacimiento');
         $usuario->foto = $request->input('foto');
         $usuario->password = $pwd;
-        if($request->hasFile('foto')){
-            $usuario->foto=$request->file('foto')->store('uploads','public');
+        if ($request->hasFile('foto')) {
+            $usuario->foto = $request->file('foto')->store('uploads', 'public');
         }
 
         $usuario->save();
 
-        return redirect('/usuarios')->with('success','Usuario Creado');
+        return redirect('/usuarios')->with('success', 'Usuario Creado');
     }
 
     /**
@@ -76,10 +76,9 @@ class UsuarioController extends Controller
      */
     public function show($id)
     {
-        $usuario=Usuario::find($id);
-            return view('usuario.show')->with('usuario', $usuario);
+        $usuario = Usuario::find($id);
+        return view('usuario.show')->with('usuario', $usuario);
     }
-
     /**
      * Show the form for editing the specified resource.
      *
@@ -88,8 +87,8 @@ class UsuarioController extends Controller
      */
     public function edit($id)
     {
-        $usuario=Usuario::find($id);
-            return view('usuario.edit')->with('usuario', $usuario);
+        $usuario = Usuario::find($id);
+        return view('usuario.edit')->with('usuario', $usuario);
     }
 
     /**
@@ -101,21 +100,22 @@ class UsuarioController extends Controller
      */
     public function update(Request $request, $id)
     {
-      
-
         // Actualizar usuario
-        $usuario=Usuario::find($id);
-        $pwd=hash('sha256',$request->input('password'));
+        $usuario = Usuario::find($id);
+        $pwd = hash('sha256', $request->input('password'));
         $usuario->rut = $request->input('rut');
         $usuario->nombre = $request->input('nombre');
         $usuario->apellido = $request->input('apellido');
         $usuario->email = $request->input('email');
         $usuario->fecha_nacimiento = $request->input('fecha_nacimiento');
         $usuario->password = $pwd;
+        if ($request->hasFile('foto')) {
+
+            Storage::delete('public/' . $usuario->foto);
+            $usuario->foto = $request->file('foto')->store('uploads', 'public');
+        }
         $usuario->save();
-
-
-        return view('usuario.edit')->with('usuario',$usuario);
+        return view('usuario.edit')->with('usuario', $usuario);
     }
 
     /**
@@ -126,16 +126,94 @@ class UsuarioController extends Controller
      */
     public function destroy($id)
     {
-        $usuarios=Usuario::find($id);
-            $usuarios->delete();
-            return redirect('/usuarios')->with('success','Usuario Eliminado');
+        $usuario = Usuario::find($id);
+        Storage::delete('public/' . $usuario->foto);
+        $usuario->delete();
+        return redirect('/usuarios')->with('success', 'Usuario Eliminado');
     }
 
-    public function verificaRut($rut){
-        $usuario = Usuario::where('rut',$rut)->first();
-          if (is_object($usuario)) {
-              return response()->json(['error'=>'Rut no disponible']);
-          } 
-          return  response()->json(['success'=>'Rut disponible']);
-      }
+    /**
+     * @param  string  $rut
+     * @return \Illuminate\Http\Response
+     * vareifica que exista el rut del usuario en la base de datos
+     */
+    public function verificaRut($rut)
+    {
+        $usuario = Usuario::find('rut', $rut)->first();
+        if (is_object($usuario)) {
+            return response()->json(['error' => 'RUT No Disponible']);
+        }
+        return  response()->json(['success' => 'RUT Disponible']);
+    }
+
+    /**
+     * listado de todos los usuarios api
+     */
+    public function getAllUsuarios()
+    {
+        $usuarios = Usuario::all();
+        if (is_object($usuarios)) {
+            $data = array(
+                'code' => 200,
+                'status' => 'success',
+                'users' => $usuarios
+            );
+        } else {
+            $data = array(
+                'code' => 404,
+                'status' => 'error',
+                'message' => 'Los usuarios no existen'
+            );
+        }
+        return response()->json($data, $data['code']);
+    }
+    /**
+     * buscar ususario por id api
+     */
+    public function findById($id)
+    {
+        $usuario = Usuario::find($id);
+        if (is_object($usuario)) {
+            $data = array(
+                'code' => 200,
+                'status' => 'success',
+                'usuario' => $usuario
+            );
+        } else {
+            $data = array(
+                'code' => 404,
+                'status' => 'error',
+                'message' => 'No existe el usuario'
+            );
+        }
+        return response()->json($data, $data['code']);
+    }
+
+    /**
+     * eliminar usuario por id api
+     */
+    public function destroyUsuario($id)
+    {
+        //conseguir el registro 
+        $usuario = Usuario::find($id);
+        if (is_object($usuario)) {
+
+            //Borrar el registro
+            $usuario->delete();
+
+            //Devolver una respuesta
+            $data = [
+                'code' => 200,
+                'status' => 'success',
+                'message' => 'El usuario con id: ' . $usuario->id . ', fue eliminado'
+            ];
+        } else {
+            $data = [
+                'code' => 404,
+                'status' => 'error',
+                'message' => 'El usuario no existe'
+            ];
+        }
+        return response()->json($data, $data['code']);
+    }
 }
