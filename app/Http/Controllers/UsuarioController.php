@@ -45,8 +45,7 @@ class UsuarioController extends Controller
             'nombre' => 'required',
             'apellido' => 'required',
             'email' => 'required',
-            'password' => 'required',
-            'foto'=>'required|mimes:jpg'
+            'password' => 'required'
         ]);
 
         // Crear usuario
