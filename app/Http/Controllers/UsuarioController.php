@@ -42,8 +42,6 @@ class UsuarioController extends Controller
 
         $this->validate($request, [
             'rut' => 'required',
-            'nombre' => 'required',
-            'apellido' => 'required',
             'email' => 'required',
             'password' => 'required'
         ]);
