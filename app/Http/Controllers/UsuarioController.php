@@ -18,7 +18,6 @@ class UsuarioController extends Controller
         $usuarios = Usuario::all();
         return view('usuario.index')->with('usuarios', $usuarios);
     }
-
     /**
      * Show the form for creating a new resource.
      *
@@ -28,9 +27,6 @@ class UsuarioController extends Controller
     {
         return view('usuario.create');
     }
-
-
-
     /**
      * Store a newly created resource in storage.
      *
@@ -39,7 +35,6 @@ class UsuarioController extends Controller
      */
     public function store(Request $request)
     {
-
         $this->validate($request, [
             'rut' => 'required',
             'email' => 'required',
@@ -64,7 +59,6 @@ class UsuarioController extends Controller
 
         return redirect('/usuarios')->with('success', 'Usuario Creado');
     }
-
     /**
      * Display the specified resource.
      *
@@ -87,7 +81,6 @@ class UsuarioController extends Controller
         $usuario = Usuario::find($id);
         return view('usuario.edit')->with('usuario', $usuario);
     }
-
     /**
      * Update the specified resource in storage.
      *
